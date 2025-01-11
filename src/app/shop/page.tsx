@@ -8,7 +8,7 @@ import Navbar from "../components/secondheader";
 interface Product {
   id: string;
   name: string;
-  image: string;
+  image: { imageUrl: string }; // Adjusted for nested image structure
   price: string;
 }
 
@@ -94,7 +94,7 @@ const ShopPage = () => {
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
                       <Image
-                        src={product.image}
+                        src={product.image.imageUrl || "/placeholder-image.jpg"} // Fallback to placeholder image
                         alt={product.name}
                         className="w-full h-50 object-cover"
                         width={300}
@@ -139,7 +139,7 @@ const ShopPage = () => {
               {/* Author Card */}
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
                 <Image
-                  src="https://via.placeholder.com/80"
+                  src="/blogauthor.png"
                   alt="Author"
                   className="w-20 h-20 rounded-full mx-auto mb-3"
                   width={80}
