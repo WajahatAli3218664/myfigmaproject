@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.client-bg-image {
+    background-image: url("images/backgroundHeader.png");
+    background-size: cover; /* Adjust to your needs */
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .signup-bg-image {
+    background-image: url("images/signup1.png");
+    background-size: cover; /* Adjust to your needs */
+    background-position: center;
+    background-repeat: no-repeat;
+  }
