@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "@/app/components/secondheader";
-import { FaHeart, FaShareAlt, FaShoppingCart } from "react-icons/fa";
-import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/app/store/features/cart";
 import { AppDispatch } from "@/app/store/store";
@@ -35,7 +33,6 @@ interface ApiMealItem {
 const ProductDetailPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
-  const [quantity, setQuantity] = useState<number>(1);
   const { shopdetail } = useParams();
   const [isReadMore, setIsReadMore] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
