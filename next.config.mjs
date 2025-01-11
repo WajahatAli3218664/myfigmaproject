@@ -7,10 +7,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '677fc83f0476123f76a8134b.mockapi.io',
-        pathname: '/**', // Allowing any path from this domain
+        pathname: '/**',
       },
     ],
   },
 };
 
 module.exports = nextConfig;
+
