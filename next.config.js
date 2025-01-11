@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['677fc83f0476123f76a8134b.mockapi.io'], // Replace with the domain of your image URLs
+    domains: ['img.freepik.com'], // Add this domain for freepik images
   },
 };
 
