@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Navbar from "@/app/components/secondheader";
-import { FaHeart, FaShareAlt, FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/app/store/features/cart";
