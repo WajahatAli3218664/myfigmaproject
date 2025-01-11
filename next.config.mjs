@@ -2,7 +2,7 @@
 const nextConfig = {
         reactStrictMode: true,
         images: {
-          domains: ['https://mockapi.io'], // Add the hostname here
+          domains: ['www.themealdb.com'], // Add the hostname here
         },
 };
 
