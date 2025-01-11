@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { FaSearch, FaShareAlt, FaShoppingCart, FaHeart } from "react-icons/fa";
 import Navbar from "../components/secondheader";
 
 interface Product {
   id: string;
   name: string;
-  image: string;
+  images: string; // Updated to match mock API
   price: string;
 }
 
@@ -104,14 +103,13 @@ const ShopPage = () => {
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
                       <div className="relative w-full h-[250px]">
-                        <Image
-                          src={product.image || "/placeholder-food.jpg"}
+                        <img
+                          src={product.images} // Updated to use `images` key
                           alt={product.name}
-                          layout="fill"
-                          objectFit="cover"
+                          className="w-full h-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = "/placeholder-food.jpg";
+                            target.src = "/placeholder-food.jpg"; // Placeholder for broken images
                           }}
                         />
                       </div>
@@ -163,9 +161,7 @@ const ShopPage = () => {
               </div>
 
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
-                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">
-                  Categories
-                </h4>
+                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Categories</h4>
                 <ul className="space-y-2">
                   <li>
                     <Link href="#" className="text-gray-700 hover:text-[#FF9F0D]">
@@ -191,9 +187,7 @@ const ShopPage = () => {
               </div>
 
               <div className="bg-white rounded-md shadow-md p-4">
-                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">
-                  Feedback
-                </h4>
+                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Feedback</h4>
                 <textarea
                   placeholder="Leave your feedback..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md mb-3"
@@ -211,4 +205,4 @@ const ShopPage = () => {
 };
 
 export default ShopPage;
-                        
+        
