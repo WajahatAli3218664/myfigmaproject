@@ -44,7 +44,7 @@ const ShopPage = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const query = formData.get('search')?.toString().trim() || '';
+    const query = formData.get("search")?.toString().trim() || "";
     setSearchTerm(query);
   };
 
@@ -104,13 +104,14 @@ const ShopPage = () => {
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
                       <div className="relative w-full h-[250px]">
-                        <img
-                          src={product.image}
+                        <Image
+                          src={product.image || "/placeholder-food.jpg"}
                           alt={product.name}
-                          className="w-full h-full object-cover"
+                          layout="fill"
+                          objectFit="cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder-food.jpg';
+                            target.src = "/placeholder-food.jpg";
                           }}
                         />
                       </div>
@@ -162,7 +163,9 @@ const ShopPage = () => {
               </div>
 
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
-                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Categories</h4>
+                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">
+                  Categories
+                </h4>
                 <ul className="space-y-2">
                   <li>
                     <Link href="#" className="text-gray-700 hover:text-[#FF9F0D]">
@@ -188,7 +191,9 @@ const ShopPage = () => {
               </div>
 
               <div className="bg-white rounded-md shadow-md p-4">
-                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Feedback</h4>
+                <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">
+                  Feedback
+                </h4>
                 <textarea
                   placeholder="Leave your feedback..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-md mb-3"
@@ -206,3 +211,4 @@ const ShopPage = () => {
 };
 
 export default ShopPage;
+                        
