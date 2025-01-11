@@ -8,25 +8,33 @@ import Navbar from "../components/secondheader";
 interface Product {
   id: string;
   name: string;
-  image: { imageUrl?: string }; // imageUrl is now optional
+  image: string;
   price: string;
 }
 
 const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchProducts = (query: string) => {
+    setIsLoading(true);
     fetch(`https://677fc83f0476123f76a8134b.mockapi.io/Food?q=${query}`)
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: Product[]) => {
         if (data && Array.isArray(data)) {
-          setProducts(data); // Only set the data if it's an array
+          setProducts(data);
         } else {
           setProducts([]);
         }
       })
-      .catch((err) => console.error("Failed to fetch products:", err));
+      .catch((error: Error) => {
+        console.error("Failed to fetch products:", error);
+        setProducts([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -35,7 +43,8 @@ const ShopPage = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = (e.target as HTMLFormElement)["search"].value.trim();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const query = formData.get('search')?.toString().trim() || '';
     setSearchTerm(query);
   };
 
@@ -67,9 +76,7 @@ const ShopPage = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto py-8 px-6 lg:px-12">
           <div className="flex flex-wrap lg:flex-nowrap gap-8">
-            {/* Product Section */}
             <div className="w-full lg:w-3/4">
-              {/* Search Field */}
               <form onSubmit={handleSearch} className="flex w-full mb-6">
                 <input
                   type="text"
@@ -86,19 +93,27 @@ const ShopPage = () => {
               </form>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.length > 0 ? (
+                {isLoading ? (
+                  <div className="col-span-full text-center">
+                    <p className="text-xl text-gray-700">Loading...</p>
+                  </div>
+                ) : products.length > 0 ? (
                   products.map((product) => (
                     <div
                       key={product.id}
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
-                      <Image
-                        src={product.image?.imageUrl || "/placeholder-image.jpg"} // Fallback to placeholder image
-                        alt={product.name}
-                        className="w-full h-50 object-cover"
-                        width={300}
-                        height={300}
-                      />
+                      <div className="relative w-full h-[250px]">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder-food.jpg';
+                          }}
+                        />
+                      </div>
                       <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <Link
                           href="#"
@@ -121,28 +136,24 @@ const ShopPage = () => {
                       </div>
                       <div className="p-4">
                         <h4 className="text-lg font-semibold">{product.name}</h4>
-                        <p className="text-sm text-[#FF9F0D]">{product.price}</p>
+                        <p className="text-sm text-[#FF9F0D]">${product.price}</p>
                       </div>
                     </div>
                   ))
                 ) : (
                   <div className="col-span-full text-center">
-                    <p className="text-xl text-gray-700">Loading...</p>
+                    <p className="text-xl text-gray-700">No products found</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Sidebar */}
             <aside className="w-full lg:w-1/4 p-4 border-l-2">
-              {/* Author Card */}
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
-                <Image
+                <img
                   src="/blogauthor.png"
                   alt="Author"
-                  className="w-20 h-20 rounded-full mx-auto mb-3"
-                  width={80}
-                  height={80}
+                  className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
                 />
                 <h4 className="text-center font-bold text-lg mb-2">John Doe</h4>
                 <p className="text-center text-sm text-gray-600">
@@ -150,7 +161,6 @@ const ShopPage = () => {
                 </p>
               </div>
 
-              {/* Categories */}
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
                 <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Categories</h4>
                 <ul className="space-y-2">
@@ -177,7 +187,6 @@ const ShopPage = () => {
                 </ul>
               </div>
 
-              {/* Feedback Section */}
               <div className="bg-white rounded-md shadow-md p-4">
                 <h4 className="font-bold text-lg mb-4 text-[#FF9F0D]">Feedback</h4>
                 <textarea
