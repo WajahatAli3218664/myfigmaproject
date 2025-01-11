@@ -8,49 +8,25 @@ import Navbar from "../components/secondheader";
 interface Product {
   id: string;
   name: string;
-  image: string;
+  image: { imageUrl?: string }; // imageUrl is now optional
   price: string;
-}
-
-// Define the type for the API response
-interface ApiProduct {
-  id: string;
-  name: string;
-  image: string;
-  price: string;
-  [key: string]: unknown; // For any additional properties from the API
 }
 
 const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
 
   const fetchProducts = (query: string) => {
-    setIsLoading(true);
     fetch(`https://677fc83f0476123f76a8134b.mockapi.io/Food?q=${query}`)
       .then((res) => res.json())
-      .then((data: ApiProduct[]) => {
+      .then((data) => {
         if (data && Array.isArray(data)) {
-          // Type-safe mapping of API data to Product interface
-          const formattedData: Product[] = data.map((product: ApiProduct) => ({
-            id: product.id,
-            name: product.name,
-            image: product.image || '/placeholder-image.jpg',
-            price: product.price
-          }));
-          setProducts(formattedData);
+          setProducts(data); // Only set the data if it's an array
         } else {
           setProducts([]);
         }
       })
-      .catch((error: Error) => {
-        console.error("Failed to fetch products:", error);
-        setProducts([]);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .catch((err) => console.error("Failed to fetch products:", err));
   };
 
   useEffect(() => {
@@ -61,10 +37,6 @@ const ShopPage = () => {
     e.preventDefault();
     const query = (e.target as HTMLFormElement)["search"].value.trim();
     setSearchTerm(query);
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = '/placeholder-image.jpg';
   };
 
   return (
@@ -95,7 +67,9 @@ const ShopPage = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto py-8 px-6 lg:px-12">
           <div className="flex flex-wrap lg:flex-nowrap gap-8">
+            {/* Product Section */}
             <div className="w-full lg:w-3/4">
+              {/* Search Field */}
               <form onSubmit={handleSearch} className="flex w-full mb-6">
                 <input
                   type="text"
@@ -112,26 +86,19 @@ const ShopPage = () => {
               </form>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {isLoading ? (
-                  <div className="col-span-full text-center">
-                    <p className="text-xl text-gray-700">Loading...</p>
-                  </div>
-                ) : products.length > 0 ? (
+                {products.length > 0 ? (
                   products.map((product) => (
                     <div
                       key={product.id}
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
-                      <div className="relative w-full h-[250px]">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          onError={handleImageError}
-                        />
-                      </div>
+                      <Image
+                        src={product.image?.imageUrl || "/placeholder-image.jpg"} // Fallback to placeholder image
+                        alt={product.name}
+                        className="w-full h-50 object-cover"
+                        width={300}
+                        height={300}
+                      />
                       <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <Link
                           href="#"
@@ -160,12 +127,13 @@ const ShopPage = () => {
                   ))
                 ) : (
                   <div className="col-span-full text-center">
-                    <p className="text-xl text-gray-700">No products found</p>
+                    <p className="text-xl text-gray-700">Loading...</p>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Sidebar */}
             <aside className="w-full lg:w-1/4 p-4 border-l-2">
               {/* Author Card */}
               <div className="bg-white rounded-md shadow-md p-4 mb-6">
