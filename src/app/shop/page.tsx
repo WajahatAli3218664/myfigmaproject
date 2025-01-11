@@ -8,7 +8,7 @@ import Navbar from "../components/secondheader";
 interface Product {
   id: string;
   name: string;
-  image: { imageUrl: string }; // Adjusted for nested image structure
+  image: { imageUrl?: string }; // imageUrl is now optional
   price: string;
 }
 
@@ -17,12 +17,11 @@ const ShopPage = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const fetchProducts = (query: string) => {
-    // Replace with the given mock API URL
     fetch(`https://677fc83f0476123f76a8134b.mockapi.io/Food?q=${query}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data) {
-          setProducts(data); // Assuming the mock API response contains an array of products
+        if (data && Array.isArray(data)) {
+          setProducts(data); // Only set the data if it's an array
         } else {
           setProducts([]);
         }
@@ -94,7 +93,7 @@ const ShopPage = () => {
                       className="bg-white rounded-md shadow-md overflow-hidden group relative"
                     >
                       <Image
-                        src={product.image.imageUrl || "/placeholder-image.jpg"} // Fallback to placeholder image
+                        src={product.image?.imageUrl || "/placeholder-image.jpg"} // Fallback to placeholder image
                         alt={product.name}
                         className="w-full h-50 object-cover"
                         width={300}
