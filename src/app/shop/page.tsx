@@ -12,6 +12,15 @@ interface Product {
   price: string;
 }
 
+// Define the type for the API response
+interface ApiProduct {
+  id: string;
+  name: string;
+  image: string;
+  price: string;
+  [key: string]: unknown; // For any additional properties from the API
+}
+
 const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -21,10 +30,10 @@ const ShopPage = () => {
     setIsLoading(true);
     fetch(`https://677fc83f0476123f76a8134b.mockapi.io/Food?q=${query}`)
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: ApiProduct[]) => {
         if (data && Array.isArray(data)) {
-          // Ensure image URLs are valid
-          const formattedData = data.map((product: any) => ({
+          // Type-safe mapping of API data to Product interface
+          const formattedData: Product[] = data.map((product: ApiProduct) => ({
             id: product.id,
             name: product.name,
             image: product.image || '/placeholder-image.jpg',
@@ -35,8 +44,8 @@ const ShopPage = () => {
           setProducts([]);
         }
       })
-      .catch((err) => {
-        console.error("Failed to fetch products:", err);
+      .catch((error: Error) => {
+        console.error("Failed to fetch products:", error);
         setProducts([]);
       })
       .finally(() => {
@@ -52,6 +61,10 @@ const ShopPage = () => {
     e.preventDefault();
     const query = (e.target as HTMLFormElement)["search"].value.trim();
     setSearchTerm(query);
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = '/placeholder-image.jpg';
   };
 
   return (
@@ -116,9 +129,7 @@ const ShopPage = () => {
                           fill
                           className="object-cover"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          onError={(e: any) => {
-                            e.target.src = '/placeholder-image.jpg';
-                          }}
+                          onError={handleImageError}
                         />
                       </div>
                       <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
