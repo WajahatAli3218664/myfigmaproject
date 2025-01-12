@@ -2,15 +2,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Navbar from "@/app/components/secondheader";
-import { FaHeart, FaShareAlt, FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
+import Navbar from "@/app/components/secondheader";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/app/store/features/cart";
 import { AppDispatch } from "@/app/store/store";
 import { toast } from "react-toastify";
+import { FaShoppingCart, FaShareAlt, FaHeart } from "react-icons/fa";
 
-// Define the Product interface
 interface Product {
   idMeal: string;
   strMeal: string;
@@ -19,29 +18,23 @@ interface Product {
   strInstructions: string;
 }
 
-// Define the type for the API response item
 interface ApiMealItem {
   id: string;
   name: string;
   images: string;
   price: number;
   description: string;
-  idMeal: string;
-  strMeal: string;
-  strMealThumb: string;
-  strInstructions: string;
 }
 
 const ProductDetailPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
-  const [quantity, setQuantity] = useState<number>(1);
   const { shopdetail } = useParams();
   const [isReadMore, setIsReadMore] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
-  // Fetch product detail based on product ID
   useEffect(() => {
     if (typeof shopdetail === "string") {
       fetchProductDetail(shopdetail);
@@ -49,47 +42,48 @@ const ProductDetailPage = () => {
     }
   }, [shopdetail]);
 
-  // Fetch product details from the mock API
   const fetchProductDetail = async (id: string) => {
-    const res = await fetch(
-      `https://677fc83f0476123f76a8134b.mockapi.io/Food/${id}`
-    );
-    const data = await res.json();
-    if (data) {
-      setProduct({
-        idMeal: data.id,
-        strMeal: data.name,
-        strMealThumb: data.images,  // Assuming `images` returns the correct image URL
-        price: data.price,  // Mock data should have the price field
-        strInstructions: data.description,
-      });
+    try {
+      const res = await fetch(
+        `https://677fc83f0476123f76a8134b.mockapi.io/Food/${id}`
+      );
+      const data = await res.json();
+      if (data) {
+        setProduct({
+          idMeal: data.id,
+          strMeal: data.name,
+          strMealThumb: data.images, // Use the direct image URL
+          price: data.price,
+          strInstructions: data.description,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching product details:", error);
     }
   };
 
-  // Fetch similar products from the mock API
   const fetchSimilarProducts = async () => {
-    const res = await fetch("https://677fc83f0476123f76a8134b.mockapi.io/Food");
-    const data = await res.json();
-    if (data) {
-      const similarProductsData = data.slice(0, 4).map((item: ApiMealItem) => ({
-        idMeal: item.id,
-        strMeal: item.name,
-        strMealThumb: item.images,
-        price: item.price,
-        strInstructions: item.description,
-      }));
-      setSimilarProducts(similarProductsData);
+    try {
+      const res = await fetch("https://677fc83f0476123f76a8134b.mockapi.io/Food");
+      const data = await res.json();
+      if (data) {
+        const similarProductsData = data.slice(0, 4).map((item: ApiMealItem) => ({
+          idMeal: item.id,
+          strMeal: item.name,
+          strMealThumb: item.images, // Use the direct image URL
+          price: item.price,
+          strInstructions: item.description,
+        }));
+        setSimilarProducts(similarProductsData);
+      }
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
     }
   };
 
-  // Handle quantity increment
   const handleIncrement = () => setQuantity(quantity + 1);
+  const handleDecrement = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
 
-  // Handle quantity decrement
-  const handleDecrement = () =>
-    setQuantity(quantity > 1 ? quantity - 1 : 1);
-
-  // Handle adding product to cart
   const handleAddToCart = () => {
     if (product) {
       dispatch(
@@ -114,7 +108,6 @@ const ProductDetailPage = () => {
     }
   };
 
-  // Loading state while fetching product details
   if (!product) {
     return (
       <div className="text-center p-10">
@@ -147,15 +140,19 @@ const ProductDetailPage = () => {
       <section className="min-h-screen bg-gray-50 py-12 px-4 lg:px-16">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-7">
-            {/* Image Section */}
+            {/* Main Image Section */}
             <div className="lg:w-1/2 w-full">
-              <Image
-                src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
-                alt={product.strMeal}
-                width={500}
-                height={500}
-                className="w-full h-auto rounded-md"
-              />
+              {product.strMealThumb && (
+                <div className="relative w-full h-[500px]">
+                  <Image
+                    src={product.strMealThumb}
+                    alt={product.strMeal}
+                    fill
+                    className="object-cover rounded-md"
+                    priority
+                  />
+                </div>
+              )}
             </div>
 
             {/* Thumbnails Section */}
@@ -163,15 +160,16 @@ const ProductDetailPage = () => {
               {[...Array(4)].map((_, index) => (
                 <div
                   key={index}
-                  className="w-[150px] rounded-md overflow-hidden"
+                  className="relative w-[150px] h-[134px] rounded-md overflow-hidden"
                 >
-                  <Image
-                    src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
-                    alt={`Thumbnail ${index + 1}`}
-                    width={100}
-                    height={500}
-                    className="w-[150px] h-[134px] object-cover"
-                  />
+                  {product.strMealThumb && (
+                    <Image
+                      src={product.strMealThumb}
+                      alt={`Thumbnail ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -180,7 +178,6 @@ const ProductDetailPage = () => {
             <div className="lg:w-1/2 w-full flex flex-col">
               <div className="h-fit flex flex-col">
                 <h1 className="text-4xl font-bold text-gray-800">{product.strMeal}</h1>
-                {/* Description with Read More/Read Less */}
                 <div className="mt-4">
                   <p className={`text-gray-600 ${isReadMore ? "" : "line-clamp-[7]"}`}>
                     {product.strInstructions}
@@ -217,13 +214,13 @@ const ProductDetailPage = () => {
                   </button>
                 </div>
                 <button
-                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]"
+                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90"
                   onClick={handleAddToCart}
                 >
                   Add to Cart <FaShoppingCart className="inline ml-2" />
                 </button>
                 <button
-                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D] mt-4"
+                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90 mt-4"
                   onClick={() => router.push('/shop')}
                 >
                   Continue Shopping
@@ -241,16 +238,15 @@ const ProductDetailPage = () => {
                   key={product.idMeal}
                   className="bg-white rounded-md shadow-md overflow-hidden group relative"
                 >
-                  {/* Main Image */}
-                  <Image
-                    src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
-                    alt={product.strMeal}
-                    className="w-full h-50 object-cover"
-                    width={300}
-                    height={300}
-                  />
+                  <div className="relative w-full h-[200px]">
+                    <Image
+                      src={product.strMealThumb}
+                      alt={product.strMeal}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
 
-                  {/* Hover Overlay with Buttons */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Link
                       href="#"
@@ -260,13 +256,12 @@ const ProductDetailPage = () => {
                     </Link>
                     <Link
                       href={`/shop/${product.idMeal}`}
-                      className="text-[#FF9F0D] bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D]"
+                      className="text-white bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D]"
                     >
                       <FaHeart />
                     </Link>
                   </div>
 
-                  {/* Title and Price */}
                   <div className="p-4">
                     <h3 className="text-xl font-semibold text-gray-800">{product.strMeal}</h3>
                     <p className="text-lg text-gray-600">${product.price}</p>
