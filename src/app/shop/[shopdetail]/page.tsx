@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link"; // Ensure you import Link
 import Navbar from "@/app/components/secondheader";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/app/store/features/cart";
 import { AppDispatch } from "@/app/store/store";
 import { toast } from "react-toastify";
+import { FaShoppingCart, FaHeart, FaShareAlt } from "react-icons/fa"; // Import missing icons
 
 // Define the Product interface
 interface Product {
@@ -19,11 +21,11 @@ interface Product {
 
 // Define the type for the API response item
 interface ApiMealItem {
-  id: string;          
-  name: string;         
-  images: string;      
-  price: number;      
-  description: string;  
+  id: string;
+  name: string;
+  images: string;
+  price: number;
+  description: string;
   idMeal: string;
   strMeal: string;
   strMealThumb: string;
@@ -35,6 +37,7 @@ const ProductDetailPage = () => {
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   const { shopdetail } = useParams();
   const [isReadMore, setIsReadMore] = useState(false);
+  const [quantity, setQuantity] = useState(1); // Declare quantity state
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -70,6 +73,7 @@ const ProductDetailPage = () => {
     const res = await fetch("https://677fc83f0476123f76a8134b.mockapi.io/Food");
     const data = await res.json();
     if (data) {
+      const baseUrl = 'https://677fc83f0476123f76a8134b.mockapi.io'; // Define baseUrl here as well
       const similarProductsData = data.slice(0, 4).map((item: ApiMealItem) => ({
         idMeal: item.id,
         strMeal: item.name,
@@ -85,8 +89,7 @@ const ProductDetailPage = () => {
   const handleIncrement = () => setQuantity(quantity + 1);
 
   // Handle quantity decrement
-  const handleDecrement = () =>
-    setQuantity(quantity > 1 ? quantity - 1 : 1);
+  const handleDecrement = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
 
   // Handle adding product to cart
   const handleAddToCart = () => {
@@ -289,3 +292,4 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
+  
