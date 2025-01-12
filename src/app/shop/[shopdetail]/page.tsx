@@ -2,13 +2,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link"; // Ensure you import Link
 import Navbar from "@/app/components/secondheader";
+import { FaHeart, FaShareAlt, FaShoppingCart } from "react-icons/fa";
+import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/app/store/features/cart";
 import { AppDispatch } from "@/app/store/store";
 import { toast } from "react-toastify";
-import { FaShoppingCart, FaHeart, FaShareAlt } from "react-icons/fa"; // Import missing icons
 
 // Define the Product interface
 interface Product {
@@ -35,9 +35,9 @@ interface ApiMealItem {
 const ProductDetailPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+  const [quantity, setQuantity] = useState<number>(1);
   const { shopdetail } = useParams();
   const [isReadMore, setIsReadMore] = useState(false);
-  const [quantity, setQuantity] = useState(1); // Declare quantity state
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -56,13 +56,11 @@ const ProductDetailPage = () => {
     );
     const data = await res.json();
     if (data) {
-      const baseUrl = 'https://677fc83f0476123f76a8134b.mockapi.io'; // Base URL of the API or server
-      const productImageUrl = `${baseUrl}${data.images}`; // Assuming `data.images` is a relative path
       setProduct({
         idMeal: data.id,
         strMeal: data.name,
-        strMealThumb: productImageUrl, // Correct image URL
-        price: data.price, 
+        strMealThumb: data.images,  // Assuming `images` returns the correct image URL
+        price: data.price,  // Mock data should have the price field
         strInstructions: data.description,
       });
     }
@@ -73,11 +71,10 @@ const ProductDetailPage = () => {
     const res = await fetch("https://677fc83f0476123f76a8134b.mockapi.io/Food");
     const data = await res.json();
     if (data) {
-      const baseUrl = 'https://677fc83f0476123f76a8134b.mockapi.io'; // Define baseUrl here as well
       const similarProductsData = data.slice(0, 4).map((item: ApiMealItem) => ({
         idMeal: item.id,
         strMeal: item.name,
-        strMealThumb: `${baseUrl}${item.images}`, // Handle image URL correctly
+        strMealThumb: item.images,
         price: item.price,
         strInstructions: item.description,
       }));
@@ -89,7 +86,8 @@ const ProductDetailPage = () => {
   const handleIncrement = () => setQuantity(quantity + 1);
 
   // Handle quantity decrement
-  const handleDecrement = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
+  const handleDecrement = () =>
+    setQuantity(quantity > 1 ? quantity - 1 : 1);
 
   // Handle adding product to cart
   const handleAddToCart = () => {
@@ -151,17 +149,13 @@ const ProductDetailPage = () => {
           <div className="flex flex-col lg:flex-row gap-7">
             {/* Image Section */}
             <div className="lg:w-1/2 w-full">
-              {product.strMealThumb ? (
-                <Image
-                  src={product.strMealThumb}
-                  alt={product.strMeal}
-                  width={500}
-                  height={500}
-                  className="w-full h-auto rounded-md"
-                />
-              ) : (
-                <div>Loading image...</div>
-              )}
+              <Image
+                src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
+                alt={product.strMeal}
+                width={500}
+                height={500}
+                className="w-full h-auto rounded-md"
+              />
             </div>
 
             {/* Thumbnails Section */}
@@ -171,17 +165,13 @@ const ProductDetailPage = () => {
                   key={index}
                   className="w-[150px] rounded-md overflow-hidden"
                 >
-                  {product.strMealThumb ? (
-                    <Image
-                      src={product.strMealThumb}
-                      alt={`Thumbnail ${index + 1}`}
-                      width={100}
-                      height={500}
-                      className="w-[150px] h-[134px] object-cover"
-                    />
-                  ) : (
-                    <div>Loading image...</div>
-                  )}
+                  <Image
+                    src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
+                    alt={`Thumbnail ${index + 1}`}
+                    width={100}
+                    height={500}
+                    className="w-[150px] h-[134px] object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -253,7 +243,7 @@ const ProductDetailPage = () => {
                 >
                   {/* Main Image */}
                   <Image
-                    src={product.strMealThumb}
+                    src={product.strMealThumb || '/path/to/placeholder-image.jpg'} // Provide a placeholder image
                     alt={product.strMeal}
                     className="w-full h-50 object-cover"
                     width={300}
@@ -292,4 +282,3 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
-  
