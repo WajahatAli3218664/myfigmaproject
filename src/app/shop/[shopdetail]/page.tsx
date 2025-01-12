@@ -32,6 +32,7 @@ const ProductDetailPage = () => {
   const { shopdetail } = useParams();
   const [isReadMore, setIsReadMore] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
 
@@ -44,6 +45,7 @@ const ProductDetailPage = () => {
 
   const fetchProductDetail = async (id: string) => {
     try {
+      setIsLoading(true);
       const res = await fetch(
         `https://677fc83f0476123f76a8134b.mockapi.io/Food/${id}`
       );
@@ -52,13 +54,16 @@ const ProductDetailPage = () => {
         setProduct({
           idMeal: data.id,
           strMeal: data.name,
-          strMealThumb: data.images, // Use the direct image URL
+          strMealThumb: data.images,
           price: data.price,
           strInstructions: data.description,
         });
       }
     } catch (error) {
       console.error("Error fetching product details:", error);
+      toast.error("Failed to load product details. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,7 +75,7 @@ const ProductDetailPage = () => {
         const similarProductsData = data.slice(0, 4).map((item: ApiMealItem) => ({
           idMeal: item.id,
           strMeal: item.name,
-          strMealThumb: item.images, // Use the direct image URL
+          strMealThumb: item.images,
           price: item.price,
           strInstructions: item.description,
         }));
@@ -84,34 +89,70 @@ const ProductDetailPage = () => {
   const handleIncrement = () => setQuantity(quantity + 1);
   const handleDecrement = () => setQuantity(quantity > 1 ? quantity - 1 : 1);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (product) {
-      dispatch(
-        addToCart({
-          idMeal: product.idMeal,
-          strMeal: product.strMeal,
-          strMealThumb: product.strMealThumb,
-          price: product.price,
-          quantity,
-        })
-      );
-      toast.success(`${product.strMeal} has been added to the cart!`, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      router.push('/shopcart');
+      try {
+        dispatch(
+          addToCart({
+            idMeal: product.idMeal,
+            strMeal: product.strMeal,
+            strMealThumb: product.strMealThumb,
+            price: product.price,
+            quantity,
+          })
+        );
+        
+        toast.success(`${product.strMeal} has been added to the cart!`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        // Add a small delay before navigation to ensure state updates
+        setTimeout(() => {
+          router.push("/cart"); // Make sure this matches your cart page route
+        }, 300);
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        toast.error("Failed to add item to cart. Please try again.");
+      }
     }
   };
+
+  const handleContinueShopping = () => {
+    try {
+      router.push("/shop"); // Make sure this matches your shop page route
+    } catch (error) {
+      console.error("Navigation error:", error);
+      toast.error("Failed to navigate. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF9F0D] mx-auto"></div>
+          <p className="mt-4 text-xl text-gray-700">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
       <div className="text-center p-10">
-        <p className="text-xl text-gray-700">Loading...</p>
+        <p className="text-xl text-gray-700">Product not found</p>
+        <button
+          className="mt-4 px-6 py-2 bg-[#FF9F0D] text-white rounded-md hover:bg-[#FF9F0D]/90"
+          onClick={handleContinueShopping}
+        >
+          Return to Shop
+        </button>
       </div>
     );
   }
@@ -130,29 +171,28 @@ const ProductDetailPage = () => {
                 Home
               </Link>
               <span className="text-white">/</span>
-              <Link href="/menu" className="text-[#FF9F0D]">
-                Detail
+              <Link href="/shop" className="text-[#FF9F0D]">
+                Shop
               </Link>
             </div>
           </div>
         </div>
       </section>
+
       <section className="min-h-screen bg-gray-50 py-12 px-4 lg:px-16">
         <div className="container mx-auto">
           <div className="flex flex-col lg:flex-row gap-7">
             {/* Main Image Section */}
             <div className="lg:w-1/2 w-full">
-              {product.strMealThumb && (
-                <div className="relative w-full h-[500px]">
-                  <Image
-                    src={product.strMealThumb}
-                    alt={product.strMeal}
-                    fill
-                    className="object-cover rounded-md"
-                    priority
-                  />
-                </div>
-              )}
+              <div className="relative w-full h-[500px]">
+                <Image
+                  src={product.strMealThumb}
+                  alt={product.strMeal}
+                  fill
+                  className="object-cover rounded-md"
+                  priority
+                />
+              </div>
             </div>
 
             {/* Thumbnails Section */}
@@ -162,14 +202,12 @@ const ProductDetailPage = () => {
                   key={index}
                   className="relative w-[150px] h-[134px] rounded-md overflow-hidden"
                 >
-                  {product.strMealThumb && (
-                    <Image
-                      src={product.strMealThumb}
-                      alt={`Thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  )}
+                  <Image
+                    src={product.strMealThumb}
+                    alt={`Thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -200,28 +238,28 @@ const ProductDetailPage = () => {
               <div className="mt-4">
                 <div className="flex items-center space-x-4 mb-6">
                   <button
-                    className="px-4 py-2 bg-gray-300 rounded-md"
+                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
                     onClick={handleDecrement}
                   >
                     -
                   </button>
                   <span className="text-lg">{quantity}</span>
                   <button
-                    className="px-4 py-2 bg-gray-300 rounded-md"
+                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
                     onClick={handleIncrement}
                   >
                     +
                   </button>
                 </div>
                 <button
-                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90"
+                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90 transition-colors"
                   onClick={handleAddToCart}
                 >
                   Add to Cart <FaShoppingCart className="inline ml-2" />
                 </button>
                 <button
-                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90 mt-4"
-                  onClick={() => router.push('/shop')}
+                  className="w-full py-3 bg-[#FF9F0D] text-white font-bold rounded-md hover:bg-[#FF9F0D]/90 mt-4 transition-colors"
+                  onClick={handleContinueShopping}
                 >
                   Continue Shopping
                 </button>
@@ -231,7 +269,7 @@ const ProductDetailPage = () => {
 
           {/* Similar Food Section */}
           <div className="mt-12">
-            <h2 className="text-3xl font-bold mb-6">Similar Food Item</h2>
+            <h2 className="text-3xl font-bold mb-6">Similar Food Items</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {similarProducts.map((product) => (
                 <div
@@ -250,13 +288,13 @@ const ProductDetailPage = () => {
                   <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Link
                       href="#"
-                      className="text-white bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D]"
+                      className="text-white bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D] transition-colors"
                     >
                       <FaShareAlt />
                     </Link>
                     <Link
                       href={`/shop/${product.idMeal}`}
-                      className="text-white bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D]"
+                      className="text-white bg-gray-800 p-2 rounded-full hover:bg-[#FF9F0D] transition-colors"
                     >
                       <FaHeart />
                     </Link>
